@@ -4,30 +4,30 @@ Digital Cafe is a simple flask exercise for our ITMGT 45 class.
 
 ## Home Page
 
-![Image of Home Page](digitalespresso_home.png)
+![Image of Home Page](digitalespresso_home.PNG)
 
 ## Products Page
 
-![Image of Products Page](digitalespresso_products.png)
+![Image of Products Page](digitalespresso_products.PNG)
 
 ## Product Details Page
 
-![Image of Product Details Page](digitalespresso_productdetails.png)
+![Image of Product Details Page](digitalespresso_productdetails.PNG)
 
 ## Branches Page
 
-![Image of Branches Page](digitalespresso_branches.png)
+![Image of Branches Page](digitalespresso_branches.PNG)
 
 ## Cart Page
 
-![Image of Cart](digitalespresso_addcart.png)
+![Image of Cart](digitalespresso_addcart.PNG)
 
 ## Product API
 
-![Image of Products API](digitalespresso_api_products.png)
+![Image of Products API](digitalespresso_api_products.PNG)
 
 ## Branches DB
 
-![Branches DB](flask3_branches.png)
+![Branches DB](flask3_branches.PNG)
 
 
