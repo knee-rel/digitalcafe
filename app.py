@@ -4,6 +4,9 @@ from flask import request
 from flask import Flask, redirect
 from flask import session
 from flask import flash, render_template
+import ordermanagement as om
+from bson.json_util import loads, dumps
+from flask import make_response
 
 import database as db
 import authentication
@@ -25,6 +28,18 @@ def products():
     product_list = db.get_products()
     return render_template('products.html', page="Products", product_list=product_list)
 
+# @app.route('/api/products',methods=['GET'])
+# def api_get_products():
+#     resp = make_response( dumps(db.get_products()) )
+#     resp.mimetype = 'application/json'
+#     return resp
+
+@app.route('/api/products/<int:code>',methods=['GET'])
+def api_get_products():
+    resp = make_response(dumps(db.get_products()))
+    resp.mimetype = 'application/json'
+    return resp
+
 @app.route('/productdetails')
 def productdetails():
     code = request.args.get('code', '')
@@ -40,7 +55,7 @@ def branches():
 @app.route('/branchdetails')
 def branchdetails():
     code = request.args.get('code', '')
-    branch = db.get_branch(int(code))
+    branch = db.get_branch(code)
 
     return render_template('branchdetails.html', code=code, branch=branch)
 
@@ -50,6 +65,8 @@ def aboutus():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    session.pop("user", None)
+    session.pop("cart", None)
     return render_template('login.html')
 
 @app.route('/auth', methods = ['GET','POST'])
@@ -71,6 +88,10 @@ def logout():
     session.pop("user",None)
     session.pop("cart",None)
     return redirect('/')
+
+@app.route('/cart')
+def cart():
+    return render_template('cart.html')
     
 @app.route('/addtocart')
 def addtocart():
@@ -90,21 +111,79 @@ def addtocart():
     session["cart"]=cart
     return redirect('/cart')
 
-@app.route('/updatecart')
+@app.route('/updatecart', methods=['POST'])
 def updatecart():
-    cart = session["cart"]
-    code = request.form.get('code')
-    qty = request.form.get('qty')
+    code = request.form.getlist("code")
+    qty = request.form.getlist("qty")
 
-    cart[code]["qty"] = qty
-    cart [code]["subtotal"] = qty * product["price"]
+    cart = session["cart"]
+
+    for item in range(len(code)):
+        product = db.get_product(int(code[item]))
+        cart[code[item]]["qty"] = int(qty[item])
+        cart[code[item]]["subtotal"] = int(qty[item]) * int(product["price"])
 
     session["cart"] = cart
+    
     return redirect('/cart')
 
-@app.route('/cart')
-def cart():
-    return render_template('cart.html')
+@app.route('/deleteitem')
+def deleteitem():
+    code = request.args.get('code', '')
+    cart = session["cart"]
+    cart.pop(code, None)
+    session["cart"]=cart
+
+    return redirect('/cart')
+
+@app.route("/deleteall")
+def deleteall():
+    session.pop("cart", None)
+    return redirect("/cart")
+
+@app.route('/checkout')
+def checkout():
+    # clear cart in session memory upon checkout
+    om.create_order_from_cart()
+    session.pop("cart",None)
+    return redirect('/ordercomplete')
+
+@app.route('/ordercomplete')
+def ordercomplete():
+    return render_template('ordercomplete.html')
+
+@app.route('/vieworders')
+def vieworders():
+    orders = db.get_orders()
+    order_list = []
+    for item in orders:
+        for order in item["details"]:
+            order_list.append(order)
+
+    return render_template('vieworders.html', order_list=order_list)
+
+@app.route('/password')
+def changepassword():
+    return render_template('changepassword.html')
+
+@app.route('/password-auth', methods = ['POST'])
+def passwordauth():
+    old = request.form.get('old-password')
+    new = request.form.get('new-password')
+    confirm = request.form.get('confirm-password')
+
+    is_successful, is_correct_old, is_same_new = authentication.change_password_verification(old, new, confirm)
+    app.logger.info('%s', is_successful)
+    if(is_successful):
+        db.change_pass(session['user']['username'], new)
+        return redirect('/login')
+    else:
+        if not is_correct_old:
+            flash("Old password is not correct.")
+        if not is_same_new:
+            flash("Passwords do not match.")
+
+        return redirect('/password')
 
 
 
