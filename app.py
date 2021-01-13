@@ -93,15 +93,37 @@ def logout():
 def cart():
     return render_template('cart.html')
     
+# @app.route('/addtocart')
+# def addtocart():
+#     code = request.args.get('code', '')
+#     product = db.get_product(int(code))
+#     prod=dict()
+
+#     prod['code'] = code
+#     prod["qty"] = 1
+#     prod["name"] = product["name"]
+#     prod["subtotal"] = int(product["price"])*int(prod["qty"])
+
+#     if(session.get("cart") is None):
+#         session["cart"]={}
+
+#     cart = session["cart"]
+#     cart[code]=prod 
+#     session["cart"]=cart
+#     return redirect('/cart')
+
 @app.route('/addtocart')
 def addtocart():
     code = request.args.get('code', '')
     product = db.get_product(int(code))
     item=dict()
+    # A click to add a product translates to a 
+    # quantity of 1 for now
 
+    item["code"] = code
     item["qty"] = 1
     item["name"] = product["name"]
-    item["subtotal"] = product["price"]*item["qty"]
+    item["subtotal"] = int(product["price"])*int(item["qty"])
 
     if(session.get("cart") is None):
         session["cart"]={}
@@ -118,17 +140,17 @@ def updatecart():
 
     cart = session["cart"]
 
-    for item in range(len(code)):
-        product = db.get_product(int(code[item]))
-        cart[code[item]]["qty"] = int(qty[item])
-        cart[code[item]]["subtotal"] = int(qty[item]) * int(product["price"])
+    for prod in range(len(code)):
+        product = db.get_product(int(code[prod]))
+        cart[code[prod]]["qty"] = int(qty[prod])
+        cart[code[prod]]["subtotal"] = int(qty[prod]) * int(product["price"])
 
     session["cart"] = cart
     
     return redirect('/cart')
 
-@app.route('/deleteitem')
-def deleteitem():
+@app.route('/removeitem')
+def removeitem():
     code = request.args.get('code', '')
     cart = session["cart"]
     cart.pop(code, None)
@@ -136,8 +158,8 @@ def deleteitem():
 
     return redirect('/cart')
 
-@app.route("/deleteall")
-def deleteall():
+@app.route("/removeall")
+def removeall():
     session.pop("cart", None)
     return redirect("/cart")
 
@@ -156,8 +178,8 @@ def ordercomplete():
 def vieworders():
     orders = db.get_orders()
     order_list = []
-    for item in orders:
-        for order in item["details"]:
+    for prod in orders:
+        for order in prod["details"]:
             order_list.append(order)
 
     return render_template('vieworders.html', order_list=order_list)
@@ -166,24 +188,26 @@ def vieworders():
 def changepassword():
     return render_template('changepassword.html')
 
-@app.route('/password-auth', methods = ['POST'])
-def passwordauth():
-    old = request.form.get('old-password')
-    new = request.form.get('new-password')
-    confirm = request.form.get('confirm-password')
+@app.route('/password-change', methods = ['POST'])
+def passwordchange():
+    old_pass = request.form.get('old-pass')
+    new_pass = request.form.get('new-pass')
+    confirm_pass= request.form.get('confirm-pass')
 
-    is_successful, is_correct_old, is_same_new = authentication.change_password_verification(old, new, confirm)
-    app.logger.info('%s', is_successful)
-    if(is_successful):
-        db.change_pass(session['user']['username'], new)
+    is_success, match_with_old, same_with_new = authentication.valid_change(old_pass, new_pass, confirm_pass)
+    app.logger.info('%s', is_success)
+    if(is_success):
+        db.change_pass(session['user']['username'], new_pass)
         return redirect('/login')
     else:
-        if not is_correct_old:
-            flash("Old password is not correct.")
-        if not is_same_new:
-            flash("Passwords do not match.")
+        if not match_with_old:
+            flash("Old password is incorrect.")
+        if not same_with_new:
+            flash("New passwords do not match.")
 
         return redirect('/password')
+
+
 
 
 

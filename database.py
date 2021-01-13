@@ -94,8 +94,8 @@ def get_branches():
 
     branches_coll = products_db["branches"]
 
-    for p in branches_coll.find({}):
-        branch_list.append(p)
+    for branch in branches_coll.find({}):
+        branch_list.append(branch)
 
     return branch_list
 

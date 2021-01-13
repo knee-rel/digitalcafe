@@ -14,17 +14,17 @@ def login(username, password):
    
     return is_valid_login, user
 
-def change_password_verification(old, new, confirm):
-    old_is_correct = False
-    new_is_same = False
-    change_is_valid = False
+def valid_change(old_pass, new_pass, confirm_pass):
+    old_correct = False
+    new_same = False
+    valid = False
     temp_user = db.get_user(session["user"]["username"])
-    if(old == temp_user["password"]):
-        old_is_correct = True
-    if(new == confirm):
-        new_is_same = True
+    if(old_pass == temp_user["password"]):
+        old_correct = True
+    if(new_pass == confirm_pass):
+        new_same = True
 
-    if old_is_correct and new_is_same:
-        change_is_valid = True
+    if old_correct and new_same:
+        valid = True
 
-    return old_is_correct, new_is_same, change_is_valid
+    return old_correct, new_same, valid
