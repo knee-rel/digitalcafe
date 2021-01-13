@@ -30,4 +30,15 @@ Digital Cafe is a simple flask exercise for our ITMGT 45 class.
 
 ![Branches DB](flask3_branches.PNG)
 
+## View Orders
+
+![View Orders](digitalespresso_vieworders.PNG)
+
+## Update, Delete Item, Delete All
+
+![Cart](digitalespresso_cart.PNG)
+
+## Change Password
+
+![Password](digitalespress_changepass.PNG)
 
