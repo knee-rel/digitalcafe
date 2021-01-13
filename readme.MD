@@ -40,5 +40,5 @@ Digital Cafe is a simple flask exercise for our ITMGT 45 class.
 
 ## Change Password
 
-![Password](digitalespress_changepass.PNG)
+![Password](digitalespresso_changepass.PNG)
 
